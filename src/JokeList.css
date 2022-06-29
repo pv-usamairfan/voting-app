@@ -3,7 +3,9 @@
   width: 80%;
   height: 80%;
 }
-
+.upload-button{
+  margin-left: 88%;
+}
 .JokeList-sidebar {
   background: #9575cd;
   display: flex;
