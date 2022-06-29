@@ -47,8 +47,8 @@ class JokeList extends Component {
         this.handleLoggedinApp = this.handleLoggedinApp.bind(this);
         this.handleVote = this.handleVote.bind(this);
         this.countVote = this.countVote.bind(this);
-        this.addJokesInFireBase = this.addJokesInFireBase.bind(this);
-        this.getJokesFireBase = this.getJokesFireBase.bind(this);
+        // this.addJokesInFireBase = this.addJokesInFireBase.bind(this);
+        // this.getJokesFireBase = this.getJokesFireBase.bind(this);
         this.getIp = this.getIp.bind(this);
         this.handleUpload = this.handleUpload.bind(this);
         this.getPost = this.getPost.bind(this);
@@ -77,7 +77,7 @@ class JokeList extends Component {
     }
    
     userCollectionRef = collection(db,"users");
-    jokesCollectionRef = collection(db,"jokes");
+    // jokesCollectionRef = collection(db,"jokes");
     voteCollectionRef = collection(db,"votes");
     postCollectionRef = collection(db,"posts");
 
@@ -95,76 +95,76 @@ class JokeList extends Component {
         
     }
 
-    async getJokes() {
-        try {
-            let jokes = []
-            //use new Set to prevent jokes duplication from API
-            const seenJokes = new Set(this.state.jokes.map(j => j.id));
-            while (jokes.length < this.props.numJokesToGet) {
-                let res = await axios.get("https://icanhazdadjoke.com/", { headers: { Accept: "application/json" } })
-                if (!seenJokes.has(res.data.id)) {
-                    jokes.push({
-                        text: res.data.joke,
-                        id: res.data.id,
-                        votes: 0
-                    })
-                    // below is usefully to prevent duplication
-                    // when there's no jokes in this.state when doing the first call. 
-                    seenJokes.add(res.data.id)
-                } else {
-                    console.log("Duplicate Jokes Found!!!")
-                }
-            }
+    // async getJokes() {
+    //     try {
+    //         let jokes = []
+    //         //use new Set to prevent jokes duplication from API
+    //         const seenJokes = new Set(this.state.jokes.map(j => j.id));
+    //         while (jokes.length < this.props.numJokesToGet) {
+    //             let res = await axios.get("https://icanhazdadjoke.com/", { headers: { Accept: "application/json" } })
+    //             if (!seenJokes.has(res.data.id)) {
+    //                 jokes.push({
+    //                     text: res.data.joke,
+    //                     id: res.data.id,
+    //                     votes: 0
+    //                 })
+    //                 // below is usefully to prevent duplication
+    //                 // when there's no jokes in this.state when doing the first call. 
+    //                 seenJokes.add(res.data.id)
+    //             } else {
+    //                 console.log("Duplicate Jokes Found!!!")
+    //             }
+    //         }
         
-            console.log(seenJokes)
-            this.setState(st => ({
-                loading: false,
-                jokes: [...st.jokes, ...jokes]
-            }),
-                () => window.localStorage.setItem("jokes", JSON.stringify(this.state.jokes))
-                //above callback function run right after setState finished
-            )
-        } catch (e) {
-            alert(e)
-            this.setState({ loading: false });
+    //         console.log(seenJokes)
+    //         this.setState(st => ({
+    //             loading: false,
+    //             jokes: [...st.jokes, ...jokes]
+    //         }),
+    //             () => window.localStorage.setItem("jokes", JSON.stringify(this.state.jokes))
+    //             //above callback function run right after setState finished
+    //         )
+    //     } catch (e) {
+    //         alert(e)
+    //         this.setState({ loading: false });
             
-        }
-    }
-    // compare with firebase with local storage 
-    // get jokes from firebase 
-    async getJokesFireBase(){
-        const firebaseJokesDocs = await getDocs(this.jokesCollectionRef);
-        const firebasejoke = firebaseJokesDocs.docs.map((jk)=> ({...jk.data() , _id:jk.id}));
-        if(firebasejoke.length === 0){
-            this.addJokesInFireBase();
-        }
-          this.setState(st => ({
-            loading: false,
-            firebaseJokes: [...st.firebaseJokes, firebasejoke].flat()
-        }))
+    //     }
+    // }
+    // // compare with firebase with local storage 
+    // // get jokes from firebase 
+    // async getJokesFireBase(){
+    //     const firebaseJokesDocs = await getDocs(this.jokesCollectionRef);
+    //     const firebasejoke = firebaseJokesDocs.docs.map((jk)=> ({...jk.data() , _id:jk.id}));
+    //     if(firebasejoke.length === 0){
+    //         this.addJokesInFireBase();
+    //     }
+    //       this.setState(st => ({
+    //         loading: false,
+    //         firebaseJokes: [...st.firebaseJokes, firebasejoke].flat()
+    //     }))
         
-    }
+    // }
     //  add Jokes TO Fire Base
-    async addJokesInFireBase(){
+    // async addJokesInFireBase(){
    
 
-       if(this.state.firebaseJokes.length === 0){
-         for (let i=0; i<this.state.jokes.length ; i++){
-            await addDoc(this.jokesCollectionRef , {
-                jokeId:this.state.jokes[i].id,
-                content: this.state.jokes[i].text,
-                votes:0
-            });
-         }
-       }
-    }
+    //    if(this.state.firebaseJokes.length === 0){
+    //      for (let i=0; i<this.state.jokes.length ; i++){
+    //         await addDoc(this.jokesCollectionRef , {
+    //             jokeId:this.state.jokes[i].id,
+    //             content: this.state.jokes[i].text,
+    //             votes:0
+    //         });
+    //      }
+    //    }
+    // }
 
-    async getVotes()
-    {
-        const votesDoc = await getDocs(this.voteCollectionRef);
-        const vote = votesDoc.docs.map((vt)=>({...vt.data() , id:vt.id}));
-        return vote;
-    }
+    // async getVotes()
+    // {
+    //     const votesDoc = await getDocs(this.voteCollectionRef);
+    //     const vote = votesDoc.docs.map((vt)=>({...vt.data() , id:vt.id}));
+    //     return vote;
+    // }
     async countVote(pId){
         console.log("can u hear me")
         let qu = query(this.voteCollectionRef, where ("postId" , "==" , pId));
@@ -459,11 +459,13 @@ class JokeList extends Component {
                          <div className="login-form">
                             <h2>Upload</h2>
                             <div className="row">
+                            <label>Content</label>
                                 <input type= "file" onChange={(e)=>{
                                    e.preventDefault();
                                    this.setState({ content:e.target.files[0]})}}/>
                             </div>
                             <div className="row">
+                                <label>Background Image</label>
                                 <input type= "file" onChange={(e)=>{
                                    e.preventDefault();
                                    this.setState({bgimg:e.target.files[0]})}} />

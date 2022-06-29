@@ -18,7 +18,10 @@ class Joke extends Component {
         if (votes >= 3) return "#FFC107"
         return "#F44336"
     }
-
+    getbackgroundImages(){
+        console.log(this.props.bgimg)
+        return this.props.bgimg;
+    }
     getEmoji() {
         const { votes } = this.props;
          if (votes >= 15) return firstPrize;
@@ -39,7 +42,8 @@ class Joke extends Component {
                    { this.props.login && <i className="fas fa-arrow-up" onClick={this.props.upvote}></i>}
                     {this.props.admin?   <span
                         className="Joke-votes"
-                        style={{ borderColor: this.getColor() , backgroundImage:`url(${this.props.content})` }}
+                        
+                        style={{ borderColor: this.getColor(),backgroundImage: `url(${this.props.bgimg})` }}
 
                     >
                         {this.props.votes}
@@ -47,7 +51,8 @@ class Joke extends Component {
                     </span> 
                     :  <span
                         className="Joke-votes"
-                        style={{ borderColor: this.getColor() , backgroundImage:`url(${this.props.content})`}}
+                        
+                        style={{   borderColor: this.getColor(), backgroundImage: `url(${this.props.bgimg})` }}
                     >
                         {this.props.votes}
                     </span>}
