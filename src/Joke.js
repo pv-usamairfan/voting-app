@@ -43,7 +43,7 @@ class Joke extends Component {
                     {this.props.admin?   <span
                         className="Joke-votes"
                         
-                        style={{ borderColor: this.getColor(),backgroundImage: `url(${this.props.bgimg})` }}
+                        style={{ borderColor: this.getColor()}}
 
                     >
                         {this.props.votes}
@@ -51,8 +51,8 @@ class Joke extends Component {
                     </span> 
                     :  <span
                         className="Joke-votes"
-                        
-                        style={{   borderColor: this.getColor(), backgroundImage: `url(${this.props.bgimg})` }}
+
+                        style={{   borderColor: this.getColor()}}
                     >
                         {this.props.votes}
                     </span>}

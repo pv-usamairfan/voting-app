@@ -1,13 +1,13 @@
 import React, { Component, useId } from "react";
+import LoadingSpinner from "./Loading";
 import axios from "axios";
 import Joke from "./Joke"
 import "./JokeList.css";
 import {collection , addDoc , getDocs,updateDoc , doc , query , where, getDoc , onSnapshot }  from "firebase/firestore";
 import {ref , uploadBytes ,getDownloadURL} from "firebase/storage";
-import {applyActionCode, createUserWithEmailAndPassword , signInWithEmailAndPassword} from 'firebase/auth'
+import { createUserWithEmailAndPassword , signInWithEmailAndPassword} from 'firebase/auth'
 import{v4} from "uuid";
 import { db , storage,auth } from "./firebase-config";
-import { async } from "@firebase/util";
 
 
 class JokeList extends Component {
@@ -23,6 +23,7 @@ class JokeList extends Component {
             loading: false,
             login:false,
             loginModal:false,
+            loadingModel:false,
             signInModal:false,
             admin:false,
             email:"",
@@ -30,7 +31,6 @@ class JokeList extends Component {
             name:"",
             userId:"",
             confirmPassword:"",
-            firebaseJokes: [],
             ip : "",
             upload:false,
             content:"",
@@ -47,27 +47,12 @@ class JokeList extends Component {
         this.handleLoggedinApp = this.handleLoggedinApp.bind(this);
         this.handleVote = this.handleVote.bind(this);
         this.countVote = this.countVote.bind(this);
-        // this.addJokesInFireBase = this.addJokesInFireBase.bind(this);
-        // this.getJokesFireBase = this.getJokesFireBase.bind(this);
         this.getIp = this.getIp.bind(this);
         this.handleUpload = this.handleUpload.bind(this);
         this.getPost = this.getPost.bind(this);
-       
-
-
-
-
-        
-
-
-
-        
-
     }
 
     componentDidMount() {
-//    if (this.state.jokes.length === 0) this.getJokes();
-//    if (this.state.firebaseJokes.length === 0) this.getJokesFireBase();
       this.getPost();    
       auth.onAuthStateChanged((user)=>{
         if(user){
@@ -77,7 +62,6 @@ class JokeList extends Component {
     }
    
     userCollectionRef = collection(db,"users");
-    // jokesCollectionRef = collection(db,"jokes");
     voteCollectionRef = collection(db,"votes");
     postCollectionRef = collection(db,"posts");
 
@@ -94,77 +78,6 @@ class JokeList extends Component {
         this.setState({signInModal:true});
         
     }
-
-    // async getJokes() {
-    //     try {
-    //         let jokes = []
-    //         //use new Set to prevent jokes duplication from API
-    //         const seenJokes = new Set(this.state.jokes.map(j => j.id));
-    //         while (jokes.length < this.props.numJokesToGet) {
-    //             let res = await axios.get("https://icanhazdadjoke.com/", { headers: { Accept: "application/json" } })
-    //             if (!seenJokes.has(res.data.id)) {
-    //                 jokes.push({
-    //                     text: res.data.joke,
-    //                     id: res.data.id,
-    //                     votes: 0
-    //                 })
-    //                 // below is usefully to prevent duplication
-    //                 // when there's no jokes in this.state when doing the first call. 
-    //                 seenJokes.add(res.data.id)
-    //             } else {
-    //                 console.log("Duplicate Jokes Found!!!")
-    //             }
-    //         }
-        
-    //         console.log(seenJokes)
-    //         this.setState(st => ({
-    //             loading: false,
-    //             jokes: [...st.jokes, ...jokes]
-    //         }),
-    //             () => window.localStorage.setItem("jokes", JSON.stringify(this.state.jokes))
-    //             //above callback function run right after setState finished
-    //         )
-    //     } catch (e) {
-    //         alert(e)
-    //         this.setState({ loading: false });
-            
-    //     }
-    // }
-    // // compare with firebase with local storage 
-    // // get jokes from firebase 
-    // async getJokesFireBase(){
-    //     const firebaseJokesDocs = await getDocs(this.jokesCollectionRef);
-    //     const firebasejoke = firebaseJokesDocs.docs.map((jk)=> ({...jk.data() , _id:jk.id}));
-    //     if(firebasejoke.length === 0){
-    //         this.addJokesInFireBase();
-    //     }
-    //       this.setState(st => ({
-    //         loading: false,
-    //         firebaseJokes: [...st.firebaseJokes, firebasejoke].flat()
-    //     }))
-        
-    // }
-    //  add Jokes TO Fire Base
-    // async addJokesInFireBase(){
-   
-
-    //    if(this.state.firebaseJokes.length === 0){
-    //      for (let i=0; i<this.state.jokes.length ; i++){
-    //         await addDoc(this.jokesCollectionRef , {
-    //             jokeId:this.state.jokes[i].id,
-    //             content: this.state.jokes[i].text,
-    //             votes:0
-    //         });
-    //      }
-    //    }
-    // }
-
-    // async getVotes()
-    // {
-    //     const votesDoc = await getDocs(this.voteCollectionRef);
-    //     const vote = votesDoc.docs.map((vt)=>({...vt.data() , id:vt.id}));
-    //     return vote;
-    // }
     async countVote(pId){
         console.log("can u hear me")
         let qu = query(this.voteCollectionRef, where ("postId" , "==" , pId));
@@ -210,7 +123,6 @@ class JokeList extends Component {
         }
         const postDoc = doc(db, "posts", pId);
      await updateDoc(postDoc,{votes: await this.countVote(pId)})
-        
         console.log("Updated ...");
     }
     handleCreateAccount()
@@ -230,6 +142,7 @@ class JokeList extends Component {
         this.setState({ip:res.data.IPv4});
     }
     async handleSignUp(){
+      
         this.getIp();
         if(this.state.email === "") return alert("Enter email");
         if(this.state.name === "") return alert("Enter name");
@@ -243,7 +156,8 @@ class JokeList extends Component {
         const ip = users.filter((userr)=>(
             userr.ip=== this.state.ip
         ))
-    //    if(user.length>0 || ip.length>0) return alert("IP adress is already taken");
+      if(user.length>0 || ip.length>0) return alert("IP adress is already taken");
+   
        createUserWithEmailAndPassword(auth, this.state.email, this.state.password)
        .then((res) => {
            addDoc(this.userCollectionRef ,{
@@ -254,13 +168,17 @@ class JokeList extends Component {
             isAdmin:false,
             isVerified:false,
         }).then(()=>{
+    
            this.setState({signInModal:false});
+          
+         
         }).catch((e)=> console.log(e.message))
          })
        .catch(err =>alert(err.message));
 
     }
     async handleLoggedinApp(){
+        this.setState({ loadingModel:true});
         if(this.state.email === "") return alert("Enter email");
         if(this.state.password === "") return alert("Enter password");
         signInWithEmailAndPassword(auth, this.state.email, this.state.password)
@@ -271,6 +189,7 @@ class JokeList extends Component {
           this.setState({login:true,
             loginModal:false})  
             this.setState({userId:email[0].id}) 
+            this.setState({loadingModel:false})
              })
              .catch((error) => {
               alert(error.message)
@@ -292,25 +211,19 @@ class JokeList extends Component {
             }
            
         })
-        // const postDoc = await getDocs(this.postCollectionRef);
-        // const posts = postDoc.docs.map((post)=>array.push ({...post.data(), id: post.id}));
         return unsub;
         
     }
     // Handle Upload images 
     async handleUpload(){
-        if(this.state.bgimg === "" || this.state.content === "") {return console.log("i am empty");}
+        if(this.state.content === "") {return console.log("i am empty");}
         const contentImgRef = ref(storage , `content/${this.state.content.name}${v4()}`);
         uploadBytes(contentImgRef,this.state.content).then( async (res)=>{
             getDownloadURL(ref(storage, `content/${res.metadata.name}`)).then( async (value)=>{
                this.setState({contentUrl:value});
-               const  bgimageRef = ref(storage , `bgimg/${this.state.bgimg.name}${v4()}`);
-               uploadBytes(bgimageRef,this.state.bgimg).then(async (res)=>{
-                  getDownloadURL(ref(storage, `bgimg/${res.metadata.name}`)).then(async (value)=>{
-                  this.setState({bgimgUrl:value})
                   try{
                     await addDoc (this.postCollectionRef,{
-                        bgimg: this.state.bgimgUrl,
+                        email:auth.currentUser.email,
                         content: this.state.contentUrl,
                         votes:0
                     })}
@@ -318,18 +231,8 @@ class JokeList extends Component {
                         alert(`error in uploading data ${e.message}`)
                     }
                     this.setState({upload:false});
-                    
-                   
-             
         })
-                 });   
-                
-            });
-           });
-       
-          
-       
-
+                 }); 
     }
     
  
@@ -358,17 +261,20 @@ class JokeList extends Component {
                 </div>
             )
         }
-       
-        //sort the jokes base on the votes, higher votes on top
-        let jokes = this.state.jokes.sort((a, b) => b.votes - a.votes)
-        console.log(jokes)
+        // if(this.state.loadingModel){
+        //     return(
+        //     <div className="spinner"> 
+        //     <LoadingSpinner/>
+        //     </div>)
+        // }
 
         return (
                
     
             <div className='JokeList'>
+              
                 <div className="JokeList-sidebar">
-                    <h1 className="JokeList-title"><span>Voting</span> Machine</h1>
+                    <h1 className="JokeList-title"><span>Voting</span> <span>App</span></h1>
                     <img src="https://assets.dryicons.com/uploads/icon/svg/8927/0eb14c71-38f2-433a-bfc8-23d9c99b3647.svg" alt="" />
                {this.state.login ? <button
                         className="JokeList-getmore"
@@ -389,10 +295,10 @@ class JokeList extends Component {
                      </button>
                      }
                 </div>
+          
                  {/*  LOgin Modal */}
                 {
                      this.state.loginModal && 
-                
                         <div className="form-container">
                          <div className="login-form">
                             <h2>Login</h2>
@@ -464,12 +370,12 @@ class JokeList extends Component {
                                    e.preventDefault();
                                    this.setState({ content:e.target.files[0]})}}/>
                             </div>
-                            <div className="row">
+                            {/* <div className="row">
                                 <label>Background Image</label>
                                 <input type= "file" onChange={(e)=>{
                                    e.preventDefault();
                                    this.setState({bgimg:e.target.files[0]})}} />
-                            </div>
+                            </div> */}
                             <div className="button-row">
                                <button onClick={this.handleUpload}>Upload</button>
                                <button onClick={this.handleCancel}>cancel</button>
@@ -479,7 +385,7 @@ class JokeList extends Component {
                         <div className="JokeList-jokes"> 
                         {/* upload button */}
                 {this.state.login && <button className="upload-button" onClick={()=>{this.setState({upload:true})}} >Upload</button>}
-                    {this.state.postArray.length > 0 && this.state.postArray.map( (j ,index )=>{ 
+                    {this.state.postArray.length > 0? this.state.postArray.map( (j ,index )=>{ 
                         return (
                         
                             <Joke
@@ -493,7 +399,9 @@ class JokeList extends Component {
                             admin={this.state.admin}
                         />
                         )
-                    })}
+                    }):  <div className="spinner"> 
+                        <LoadingSpinner/>
+                        </div>}
                 </div>
             </div>
         );

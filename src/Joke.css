@@ -38,9 +38,9 @@
   font-weight: 300;
   border: 3px solid red;
   box-shadow: 0 10px 38px rgba(0, 0, 0, 0.2), 0 10px 12px rgba(0, 0, 0, 0.1);
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  /* background-repeat: no-repeat;
   background-position: center;
+  background-size: contain; */
 }
 
 .fa-arrow-up,
