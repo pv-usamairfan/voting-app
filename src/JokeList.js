@@ -186,8 +186,9 @@ class JokeList extends Component {
             const usersDocs = await getDocs(this.userCollectionRef);
             const users = usersDocs.docs.map((doc)=>({...doc.data(), id:doc.id} ) );
             const email = users.filter((user)=> user.email === userCredential.user.email);
-          this.setState({login:true,
-            loginModal:false})  
+          this.setState({
+            loginModal:false ,
+            login:true,})  
             this.setState({userId:email[0].id}) 
             this.setState({loadingModel:false})
              })
